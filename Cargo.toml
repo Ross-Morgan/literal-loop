@@ -1,7 +1,12 @@
 [package]
-name = "literal_loop"
+name = "repeat_for"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "Like a for loop except that's valid at crate-level"
+documentation = "https://docs.rs/repeat_for/latest/repeat_for"
+homepage = "https://crates.io/crates/repeat_for"
+repository = "https://github.com/Ross-Morgan/repeat_for"
 
 [lib]
 proc-macro = true
