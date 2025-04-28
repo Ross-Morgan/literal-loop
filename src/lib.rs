@@ -43,19 +43,31 @@ pub fn repeat_for(stream: ::proc_macro::TokenStream) -> ::proc_macro::TokenStrea
                         Ok(i) => i,
                         Err(e) => return e.into_compile_error().into(),
                     },
-                    _ => return syn::Error::new(value.span(), "List values must be integers").into_compile_error().into(),
+                    _ => {
+                        return syn::Error::new(value.span(), "List values must be integers")
+                            .into_compile_error()
+                            .into();
+                    }
                 };
 
-                blocks.push(substituted_block(input.block.clone(), loop_var_ident, ::proc_macro::Literal::i128_unsuffixed(value)));
+                blocks.push(substituted_block(
+                    input.block.clone(),
+                    loop_var_ident,
+                    ::proc_macro::Literal::i128_unsuffixed(value),
+                ));
             }
-        },
+        }
         LoopValues::Range(lower, _, upper) => {
             let lower_limit = match lower {
                 ::syn::Lit::Int(l) => match l.base10_parse::<i128>() {
                     Ok(i) => i,
                     Err(e) => return e.into_compile_error().into(),
                 },
-                _ => return syn::Error::new(lower.span(), "Range bounds must be integers").into_compile_error().into(),
+                _ => {
+                    return syn::Error::new(lower.span(), "Range bounds must be integers")
+                        .into_compile_error()
+                        .into();
+                }
             };
 
             let upper_limit = match upper {
@@ -63,11 +75,19 @@ pub fn repeat_for(stream: ::proc_macro::TokenStream) -> ::proc_macro::TokenStrea
                     Ok(i) => i,
                     Err(e) => return e.into_compile_error().into(),
                 },
-                _ => return syn::Error::new(upper.span(), "Range bounds must be integers").into_compile_error().into(),
+                _ => {
+                    return syn::Error::new(upper.span(), "Range bounds must be integers")
+                        .into_compile_error()
+                        .into();
+                }
             };
 
             for value in lower_limit..=upper_limit {
-                blocks.push(substituted_block(input.block.clone(), loop_var_ident, ::proc_macro::Literal::i128_unsuffixed(value)));
+                blocks.push(substituted_block(
+                    input.block.clone(),
+                    loop_var_ident,
+                    ::proc_macro::Literal::i128_unsuffixed(value),
+                ));
             }
         }
     }
@@ -108,11 +128,7 @@ impl ::syn::parse::Parse for Loop {
             let content;
             let _ = ::syn::parenthesized!(content in input);
 
-            LoopValues::Range(
-                content.parse()?,
-                content.parse()?,
-                content.parse()?,
-            )
+            LoopValues::Range(content.parse()?, content.parse()?, content.parse()?)
         } else {
             Err(lookahead.error())?
         };
@@ -130,26 +146,39 @@ impl ::syn::parse::Parse for Loop {
     }
 }
 
-fn substituted_block(block: ::syn::Block, ident: &::syn::Ident, value: ::proc_macro::Literal) -> ::proc_macro::TokenStream {
+fn substituted_block(
+    block: ::syn::Block,
+    ident: &::syn::Ident,
+    value: ::proc_macro::Literal,
+) -> ::proc_macro::TokenStream {
     block
         .stmts
         .iter()
         .map(|statement| ::quote::ToTokens::into_token_stream(statement))
-        .map(|stream| {
-            replace_tokens(stream.into(), ident, value.clone())
-        })
+        .map(|stream| replace_tokens(stream.into(), ident, value.clone()))
         .fold(::proc_macro::TokenStream::new(), |mut stream, block| {
             stream.extend(block);
             stream
         })
 }
 
-fn replace_tokens(stream: ::proc_macro::TokenStream, ident: &::syn::Ident, value: ::proc_macro::Literal) -> ::proc_macro::TokenStream {
+fn replace_tokens(
+    stream: ::proc_macro::TokenStream,
+    ident: &::syn::Ident,
+    value: ::proc_macro::Literal,
+) -> ::proc_macro::TokenStream {
     stream
         .into_iter()
         .map(|tt| match tt {
-            ::proc_macro::TokenTree::Ident(ref i) if i.to_string() == ident.to_string() => ::proc_macro::TokenTree::Literal(value.clone()),
-            ::proc_macro::TokenTree::Group(g) => ::proc_macro::TokenTree::Group(::proc_macro::Group::new(g.delimiter(), replace_tokens(g.stream(), ident, value.clone()))),
+            ::proc_macro::TokenTree::Ident(ref i) if i.to_string() == ident.to_string() => {
+                ::proc_macro::TokenTree::Literal(value.clone())
+            }
+            ::proc_macro::TokenTree::Group(g) => {
+                ::proc_macro::TokenTree::Group(::proc_macro::Group::new(
+                    g.delimiter(),
+                    replace_tokens(g.stream(), ident, value.clone()),
+                ))
+            }
             other => other,
         })
         .collect()
