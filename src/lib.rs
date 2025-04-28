@@ -8,7 +8,7 @@ extern crate proc_macro;
 ///
 /// ```rust
 /// # extern crate proc_macro;
-/// # use literal_loop::repeat_for;
+/// # use repeat_for::repeat_for;
 /// repeat_for!(var in [1, 2, 3] => {
 ///     /* ... */
 /// });
@@ -20,7 +20,7 @@ extern crate proc_macro;
 ///
 /// ```rust
 /// # extern crate proc_macro;
-/// # use literal_loop::repeat_for;
+/// # use repeat_for::repeat_for;
 /// # let (lower, upper) = (1, 2);
 /// repeat_for!(var in (1..=20) => {
 ///     /* ... */
