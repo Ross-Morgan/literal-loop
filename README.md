@@ -44,21 +44,21 @@ repeat_for!(x in (0..=2) => {
 ## Expands To
 
 ```rust
-struct A<const N: usize>;
+struct Foo<const N: usize>;
 
-impl A<1> {
+impl Foo<1> {
     fn bar() -> u8 {
         1
     }
 }
 
-impl A<2> {
+impl Foo<2> {
     fn bar() -> u8 {
         2
     }
 }
 
-impl A<3> {
+impl Foo<3> {
     fn bar() -> u8 {
         3
     }
