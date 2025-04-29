@@ -9,7 +9,9 @@
 
 A macro that repeats a block of code while iterating over an array or a range, substituting in values at compile-time.
 
-## Example
+# Examples
+
+## List
 
 ```rust
 struct Foo<const N: usize>;
@@ -24,7 +26,22 @@ repeat_for!(x in [0, 1, 2] => {
 });
 ```
 
-Expands to
+## Range
+
+```rust
+struct Foo<const N: usize>;
+
+// Type of each substituted variable is inferred, and each may be different
+repeat_for!(x in (0..=2) => {
+    impl Foo<x> {
+        fn bar() -> u8 {
+            x
+        }
+    }
+});
+```
+
+## Expands To
 
 ```rust
 struct A<const N: usize>;
